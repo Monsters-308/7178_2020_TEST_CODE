@@ -10,8 +10,9 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * This is a demo program showing how to use Mecanum control with the RobotDrive
@@ -24,8 +25,9 @@ public class Robot extends TimedRobot {
   private static final int kFrontRightChannel = 4;
 
   private static final int kJoystickChannel = 0;
+  
 
-  private MecanumDrive m_robotDrive;
+  private DifferentialDrive m_robotDrive;
   private Joystick m_stick;
 
   @Override
@@ -36,21 +38,22 @@ public class Robot extends TimedRobot {
     final WPI_TalonSRX frontRight = new WPI_TalonSRX(kFrontRightChannel);
     final WPI_TalonSRX rearRight = new WPI_TalonSRX(kRearRightChannel);
 
+    SpeedControllerGroup leftSide = new SpeedControllerGroup(frontLeft, rearLeft);
+    SpeedControllerGroup rightSide = new SpeedControllerGroup(frontRight, rearRight);
+
     // Invert the left side motors.
     // You may need to change or remove this to match your robot.
-    frontLeft.setInverted(true);
-    rearLeft.setInverted(true);
-
-    m_robotDrive = new MecanumDrive(frontLeft, rearLeft, frontRight, rearRight);
+    
+    m_robotDrive = new DifferentialDrive(leftSide, rightSide);
 
     m_stick = new Joystick(kJoystickChannel);
+    
   }
 
   @Override
   public void teleopPeriodic() {
     // Use the joystick X axis for lateral movement, Y axis for forward
     // movement, and Z axis for rotation.
-    m_robotDrive.driveCartesian(m_stick.getX(), m_stick.getY(),
-        m_stick.getZ(), 0.0);
+    m_robotDrive.tankDrive(m_stick.getRawAxis(5), m_stick.getRawAxis(1));
   }
 }
